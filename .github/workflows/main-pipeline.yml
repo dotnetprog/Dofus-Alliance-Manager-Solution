@@ -18,7 +18,6 @@ on:
 env:
   solutionPath: '${{ github.workspace }}/src/DAM.Application.sln'
   solutionFolder: '${{ github.workspace }}/src'
-  cd_enabled: false
 jobs:
   build:
 
@@ -51,7 +50,7 @@ jobs:
       run: dotnet publish ${{  env.solutionFolder  }}/DAM.WebApp/DAM.WebApp.csproj -c Release -o ${{env.DOTNET_ROOT}}/webapp
     - name: Upload webapp artifact
     #  if: ${{ (github.ref == 'refs/heads/main' || contains(github.ref, 'release')) && github.event_name != 'pull_request' }}
-      if: ${{ env.cd_enabled }}
+      if: false
       uses: actions/upload-artifact@v3
       with:
          name: webapp
@@ -61,7 +60,7 @@ jobs:
    name: 'Staging'
    needs: build
    uses: ./.github/workflows/cd-pipeline.yml
-   if: ${{ env.cd_enabled }}
+   if: false
  #  if: ${{ (github.ref == 'refs/heads/main' || contains(github.ref, 'release')) && github.event_name != 'pull_request' }}
    with:
      deployWorkService: false
@@ -86,7 +85,7 @@ jobs:
    name: 'Production'
    needs: deployStaging
    uses: ./.github/workflows/cd-pipeline.yml
-   if: ${{ env.cd_enabled }}
+   if: false
   # if: ${{  contains(github.ref, 'release') && github.event_name != 'pull_request' }}
    with:
      deployWorkService: true
