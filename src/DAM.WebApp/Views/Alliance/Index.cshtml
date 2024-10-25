@@ -1,0 +1,30 @@
+﻿@model IEnumerable<DAM.WebApp.Models.Alliance.AllianceViewModel>
+@{
+    ViewData["Title"] = "Pick An alliance";
+    ViewBag.Title = "Vos alliances";
+    ViewBag.pTitle = "Choisir une alliance";
+    ViewBag.pageTitle = "Alliances";
+}
+
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-xl-3 col-sm-6">
+            <div class="card text-center">
+                <div class="card-body">
+                    <a href="@Url.Action("Dashboard", "alliance",new { allianceid = item.DiscordId },null)">
+                    <div class="clearfix"></div>
+                    <div class="mb-4">
+                        <img src="@item.ImageUrl" alt="" class="avatar-lg rounded-circle img-thumbnail">
+                    </div>
+                    <h5 class="font-size-16 mb-1">@item.DisplayName</h5>
+                    </a>
+                </div>
+            </div>
+        </div>
+    
+    
+    }
+
+</div>

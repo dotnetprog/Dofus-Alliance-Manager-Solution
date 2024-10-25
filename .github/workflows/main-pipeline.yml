@@ -1,0 +1,110 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: 'Main Workflow'
+run-name: ${{ github.event.repository.name }}_${{ github.run_number }}
+permissions:
+  contents: read
+  issues: read
+  checks: write
+  pull-requests: write
+on:
+  push:
+    branches: [ "main","release/*" ]
+  pull_request:
+    branches: [ "main","release/*" ]
+  workflow_dispatch:
+
+env:
+  solutionPath: '${{ github.workspace }}/src/DAM.Application.sln'
+  solutionFolder: '${{ github.workspace }}/src'
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+  
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0
+      with:
+       versionSpec: '5.x'
+    - name: Determine Version
+      uses: gittools/actions/gitversion/execute@v0
+      with:
+        useConfigFile: true
+        configFilePath: ./.github/GitVersion.yml
+
+    - name: Restore dependencies
+      run: dotnet restore ${{  env.solutionPath  }}
+    - name: Build
+      run: dotnet build ${{  env.solutionPath  }} --configuration Release --no-restore
+    - name: dotnet publish
+      if: ${{ (github.ref == 'refs/heads/main' || contains(github.ref, 'release')) && github.event_name != 'pull_request' }}
+      run: dotnet publish ${{  env.solutionFolder  }}/DAM.WebApp/DAM.WebApp.csproj -c Release -o ${{env.DOTNET_ROOT}}/webapp
+    - name: Upload webapp artifact
+      if: ${{ (github.ref == 'refs/heads/main' || contains(github.ref, 'release')) && github.event_name != 'pull_request' }}
+      uses: actions/upload-artifact@v3
+      with:
+         name: webapp
+         path: ${{env.DOTNET_ROOT}}/webapp
+
+  deployStaging:
+   name: 'Staging'
+   needs: build
+   uses: ./.github/workflows/cd-pipeline.yml
+   if: ${{ (github.ref == 'refs/heads/main' || contains(github.ref, 'release')) && github.event_name != 'pull_request' }}
+   with:
+     deployWorkService: false
+     environment: 'staging'
+     solutionPath: 'src/DAM.Application.sln'
+     solutionFolder: 'src'
+     webappName: 'dofus-alliance-manager-dev'
+   secrets:
+     APP_INSIGHTS_CONNECTIONSTRING: ${{ secrets.APP_INSIGHTS_CONNECTIONSTRING }}
+     DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+     DAM_DISCORD_CLIENTSECRET: ${{ secrets.DAM_DISCORD_CLIENTSECRET }}
+     DAM_DISCORD_BOTTOKEN: ${{ secrets.DAM_DISCORD_BOTTOKEN }}
+     DAM_JWT_ENCRYPTIONKEY: ${{ secrets.DAM_JWT_ENCRYPTIONKEY }}
+     REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+     REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+     REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+     AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP}} 
+     AZURE_SERVICE_CREDENTIALS: ${{ secrets.AZURE_SERVICE_CREDENTIALS }} 
+     AZURE_PUBLISH_WEBAPPPROFILE: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_28D2E8C7E9214846A3BFA22FAB96B4A0 }}
+   
+  deployProduction:
+   name: 'Production'
+   needs: deployStaging
+   uses: ./.github/workflows/cd-pipeline.yml
+   if: ${{ contains(github.ref, 'release') && github.event_name != 'pull_request' }}
+   with:
+     deployWorkService: true
+     environment: 'production'
+     solutionPath: 'src/DAM.Application.sln'
+     solutionFolder: 'src'
+     webappName: 'dofus-alliance-manager'
+   secrets:
+     APP_INSIGHTS_CONNECTIONSTRING: ${{ secrets.APP_INSIGHTS_CONNECTIONSTRING }}
+     DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+     DAM_DISCORD_CLIENTSECRET: ${{ secrets.DAM_DISCORD_CLIENTSECRET }}
+     DAM_DISCORD_BOTTOKEN: ${{ secrets.DAM_DISCORD_BOTTOKEN }}
+     DAM_JWT_ENCRYPTIONKEY: ${{ secrets.DAM_JWT_ENCRYPTIONKEY }}
+     REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+     REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+     REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+     AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP}} 
+     AZURE_SERVICE_CREDENTIALS: ${{ secrets.AZURE_SERVICE_CREDENTIALS }} 
+     AZURE_PUBLISH_WEBAPPPROFILE: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8474CC2367D84017BEA9D33B99A45BE1 }}
+
+
+      
+  
+    
+  

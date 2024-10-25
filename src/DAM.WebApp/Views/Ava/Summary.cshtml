@@ -1,0 +1,231 @@
+﻿@using DAM.WebApp.Models.AvA
+@model AvAViewModel
+@{
+    ViewData["Title"] = "Sommaire de l'AvA";
+    ViewBag.Title = Model.title;
+    ViewBag.pTitle = $"AvA - {Model.title}";
+    ViewBag.pageTitle = "AvA";
+
+}
+@section styles{
+
+
+    <!-- DataTables -->
+    <link href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Responsive datatable examples -->
+    <link href="~/assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+    <style>
+        .overlay {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            background: black;
+            opacity: .5;
+            z-index: 400;
+        }
+        .overlayRow{
+            background: black;
+            opacity: .5;
+        }
+
+        table.dataTable > tbody > tr{
+            position:relative;
+        }
+
+    </style>
+
+
+}
+<div id="pageLoader" class="overlay">
+    <div style="position: relative;left: 50%;top:50%;" class="spinner-border text-dark m-1" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <input id="allianceid"
+                       name="allianceid"
+                       type="hidden"
+                       value="@ViewContext.RouteData.Values["allianceid"].ToString()" />
+                @Html.HiddenFor(Model => Model.Id);
+                <h4 class="card-title mb-4">Information</h4>
+                <div class="row">
+                    <div class="col-lg-5">
+                        <div class="mt-4">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="formrow-Fullname-input">État: </label>
+
+                                        @{
+                                            var className = "bg-info";
+                                            switch (Model.Statut)
+                                            {
+                                                case DAM.Domain.Entities.AvaResultState.Win:
+                                                    className = "bg-success";
+                                                    break;
+                                                case DAM.Domain.Entities.AvaResultState.Lost:
+                                                    className = "bg-danger";
+                                                    break;
+                                                default:
+                                                    break;
+                                            }
+                                            var value = Model.Statut?.ToString() ?? "In Progress";
+                                            <div class="badge bg-pill @className font-size-12">@value</div>
+                                                                        
+                                        }
+                                        
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label" for="formrow-Fullname-input">Créé par: </label>
+                                    <span>@Model.CreatedByName</span>
+                                </div>
+                                </div>
+                                <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label" for="formrow-Fullname-input">Créé le: </label>
+                                    <span>@Model.CreatedOn.ToString()</span>
+                                    </div>
+                                </div>
+                            </div>
+                                
+
+                                <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="formrow-Fullname-input">Statut: </label>
+
+                                        @{
+                                            var classStateName = "bg-info";
+                                            switch (Model.State)
+                                            {
+                                                case DAM.Domain.Entities.AvaState.Open:
+                                                    classStateName = "bg-info";
+                                                    break;
+                                                case DAM.Domain.Entities.AvaState.Closed:
+                                                    classStateName = "bg-dark";
+                                                    break;
+                                                default:
+                                                    break;
+                                            }
+                                            var valueState = Model.State.ToString();
+                                            <div id="State" class="badge bg-pill @classStateName font-size-12">@valueState</div>
+
+                                        }
+
+                                    </div>
+                                </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="formrow-email-input">Fermée par: </label>
+                                            <span>@Model.ClosedByName</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="formrow-password-input">Fermée le: </label>
+                                            <span>@Model.ClosedOn.ToString()</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="formrow-email-input">Montant pépites total: </label>
+                                        <span>@Model.MontantTotal</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="formrow-password-input">Montant pépites reçu</label>
+                                        <span>@Model.MontantObtenu</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="formrow-password-input">Montant par joueur: </label>
+                                        <span>@Model.MontantParJoueur</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="formrow-email-input">Pourcentage: </label>
+                                        <span>@Model.Pourcentage</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="formrow-email-input">Nombre de participants: </label>
+                                        <span>@Model.NbParticipants</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+   
+
+        <div class="col-md-6">
+            <div class="d-flex flex-wrap gap-2">
+                @if (Model.State != DAM.Domain.Entities.AvaState.Closed)
+                {
+                    if (Model.Statut.HasValue){
+                        <button id="distributeBtn" type="button" class="btn btn-primary waves-effect waves-light mb-3"><i class="far fa-money-bill-alt fa-lg"></i> Distribuer</button>
+                        <button id="closeBtn" type="button" class="btn btn-danger waves-effect waves-light mb-3"><i class="fas fa-lock fa-lg"></i> Fermer</button>
+                    }
+                
+                    
+
+                }
+                else
+                {
+                    <button id="openBtn" type="button" class="btn btn-warning waves-effect waves-light mb-3"><i class="fas fa-lock-open fa-lg"></i> Ouvrir</button>
+                }
+
+                    
+               
+                </div>
+            </div>
+</div>
+
+    
+   
+    
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+               
+                <h4 class="card-title mb-4">Liste des participants</h4>
+                <div id="membersTable" class="table-responsive">
+                    <table class="table table-centered table-nowrap mb-0 dataTable">
+                    </table>
+                </div>
+                <!-- end table-responsive -->
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="~/assets/js/customlibs/bootstrapcustomdatatable.js"></script>
+    <script src="~/assets/libs/moment/min/moment.min.js"></script>
+    <script src="~/assets/libs/moment/locale/fr-ca.js"></script>
+    <script src="~/assets/js/views/ava/summary.js"></script>
+}

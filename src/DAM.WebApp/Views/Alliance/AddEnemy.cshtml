@@ -1,0 +1,58 @@
+﻿@{
+    ViewData["Title"] = "Ajout d'une alliance adverse";
+    ViewBag.Title = "Ajout d'un ennemi";
+    ViewBag.pTitle = "nouvel ennemi";
+    ViewBag.pageTitle = "Alliances";
+
+}
+@section styles{
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/toastr/build/toastr.min.css">
+   
+
+}
+<div class="row">
+
+    <div class="col-xl-6">
+        <div class="card">
+
+            <div class="card-body">
+
+                <h4 class="card-title">Information</h4>
+                <input id="allianceid"
+                       name="allianceid"
+                       type="hidden"
+                       value="@ViewContext.RouteData.Values["allianceid"].ToString()" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3 needs-validation">
+                            <label class="form-label" for="Name">Nom de l'alliance adverse</label>
+                            <input type="text" class="form-control" id="Name" placeholder="Name" required>
+                            <div class="invalid-feedback">
+                                Le champs Nom est obligatoire
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+<div class="row mb-4">
+    <div class="col ms-auto">
+        <div class="d-flex flex-reverse flex-wrap gap-2">
+            <button id="saveBtn" class="btn btn-success"> <i class="uil uil-file-alt"></i>Créer</button>
+        </div>
+    </div> <!-- end col -->
+</div>
+
+@section scripts{
+    <!-- parsleyjs -->
+    <script src="~/assets/libs/toastr/build/toastr.min.js"></script>
+    <script src="~/assets/libs/parsleyjs/parsley.min.js"></script>
+    <script src="~/assets/js/views/alliance/addenemy.js"></script>
+
+}

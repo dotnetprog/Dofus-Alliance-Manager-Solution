@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "Liste des AvA";
+    ViewBag.Title = "Liste des AvA";
+    ViewBag.pTitle = "Vos AvA";
+    ViewBag.pageTitle = "AvA";
+
+}
+@section styles{
+
+
+    <!-- DataTables -->
+    <link href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Responsive datatable examples -->
+    <link href="~/assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+    <style>
+       .overlay{
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            background: black;
+            opacity: .5;
+            z-index:400;
+       }
+
+        .overlayRow {
+            background: black;
+            opacity: .5;
+        }
+
+        table.dataTable > tbody > tr {
+            position: relative;
+        }
+
+    </style>
+
+
+}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <input id="allianceid"
+                       name="allianceid"
+                       type="hidden"
+                       value="@ViewContext.RouteData.Values["allianceid"].ToString()" />
+                <h4 class="card-title mb-4">@ViewBag.Title</h4>
+                <div id="avaListTable" class="table-responsive">
+                    <table
+                           class="table table-centered table-nowrap mb-0 dataTable">
+                  
+                    </table>
+                </div>
+                <!-- end table-responsive -->
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <p><b>Attention!</b></p>
+               <p>Cette action est irréversible. Toute donnée sera perdu et irrécupérable</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger">Supprimer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/assets/js/customlibs/bootstrapcustomdatatable.js"></script>
+    <script src="~/assets/libs/moment/min/moment.min.js"></script>
+    <script src="~/assets/libs/moment/locale/fr-ca.js"></script>
+    <script src="~/assets/js/views/ava/index.js"></script>
+}

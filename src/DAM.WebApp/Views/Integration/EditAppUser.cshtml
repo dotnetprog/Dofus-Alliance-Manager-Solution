@@ -1,0 +1,67 @@
+﻿@model DAM.WebApp.Models.Identity.AppUserViewModel
+
+@{
+    ViewData["Title"] = "Modification d'une application";
+    ViewBag.Title = "Modifier une application";
+    ViewBag.pTitle = $"Application {Model.Id}";
+    ViewBag.pageTitle = "Integration";
+
+}
+
+@section styles {
+
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/toastr/build/toastr.min.css">
+    <!-- bootstrap-datepicker css -->
+    <link href="~/assets/libs/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
+
+
+    <!-- DataTables -->
+    <link href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Responsive datatable examples -->
+    <link href="~/assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+
+}
+<div class="row">
+
+    <div class="col-6">
+        <div class="card">
+
+            <div class="card-body">
+              
+
+                <form method="post" action="/Integration/@ViewContext.RouteData.Values["allianceid"].ToString()/EditAppUser" id="form" data-parsley-validate>
+                    @Html.HiddenFor(Model => Model.Id)
+                    <div class="mb-3 needs-validation">
+                        <label for="UserName" class="col-md-2 form-label">Nom de l'application</label>
+                        @Html.TextBoxFor(Model => Model.UserName, new { @class = "form-control" })
+
+                        <div class="invalid-feedback">
+                            Le nom est obligatoire
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <input type="submit" value="Soumettre" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div>
+    <a asp-action="AppUsers">Back to List</a>
+</div>
+@section scripts {
+    <!-- parsleyjs -->
+    <script src="~/assets/libs/toastr/build/toastr.min.js"></script>
+    <script src="~/assets/libs/parsleyjs/parsley.min.js"></script>
+    <script src="~/assets/js/views/integration/editappuser.js"></script>
+
+}

@@ -1,0 +1,298 @@
+﻿@using DAM.Core.Helpers.Utility
+@using Discord.Rest
+@using System.Globalization
+@model DAM.Domain.Entities.SaisonRanking
+
+@{
+    var saison = ViewBag.SaisonInfo as DAM.Domain.Entities.Saison;
+    var playerName = Model.Member.Nickname ?? Model.Member.Alias;
+    var avatarUrl = Model.Member.AvatarUrl?.Replace("?size=128", string.Empty);
+    var label = $"Saison - {saison.Name} | Joueur {playerName}";
+    ViewData["Title"] = label;
+    ViewBag.Title = $"Détails du joueur {playerName}";
+    ViewBag.pTitle = playerName;
+    ViewBag.pageTitle = $"Saison - {saison.Name}";
+    ViewBag.parentLink = $"/saison/{@ViewContext.RouteData.Values["allianceid"].ToString()}/Edit/{Model.SaisonId.ToString()}";
+
+    var startDate = $"{saison.StartDate.ToString("f", CultureInfo.CreateSpecificCulture("fr-FR"))}";
+    var endDate = $"{saison.EndDate.ToString("f", CultureInfo.CreateSpecificCulture("fr-FR"))}";
+    var ladderGeneratedOn = string.Empty;
+    if (saison.LadderGeneratedOn.HasValue)
+    {
+        var ladderGeneratedOnRaw = saison.LadderGeneratedOn.Value.ToParisTime();
+        ladderGeneratedOn = $"{ladderGeneratedOnRaw.ToString("f", CultureInfo.CreateSpecificCulture("fr-FR"))}";
+    }
+
+
+}
+@section metahead{
+
+    @{
+
+        var lines = new string[]
+                        {
+            $"Position #{Model.PositionRank}",
+            $"Nombre d'attaques: {Model.Nombre_attaques}",
+            $"Nombre de défenses: {Model.Nombre_defense}",
+            $"Total des points: {Model.MontantTotalPepite}",
+                        };
+
+        var description = string.Join("\n",lines);
+        ViewBag.Description = description;
+    }
+
+    <meta name='twitter:card' content='Sommaire - @saison.Name' />
+    <meta name='twitter:site' content='@playerName' />
+    <meta name='twitter:title' content='@saison.Name - Statistiques de @playerName' />
+    <meta name='twitter:description' content='@description' />
+    <meta name='twitter:image' content='@avatarUrl' />
+    <meta name='twitter:image:alt' content='@playerName' />
+
+
+
+    <!-- HTML Meta Tags -->
+  
+
+    <!-- Google / Search Engine Tags -->
+    <meta itemprop="description" content="@description">
+    <meta itemprop="image" content="@avatarUrl">
+
+    <!-- Facebook Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="@saison.Name - Statistiques de @playerName">
+    <meta property="og:description" content="@description">
+    <meta property="og:image" content="@avatarUrl">
+
+
+
+
+}
+@section styles {
+
+    <!-- DataTables -->
+    <link href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Responsive datatable examples -->
+    <link href="~/assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+}
+<style>
+    .overlay {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+        background: black;
+        opacity: .5;
+        z-index: 400;
+    }
+
+    .overlayRow {
+        background: black;
+        opacity: .5;
+    }
+
+    table.dataTable > tbody > tr {
+        position: relative;
+    }
+
+</style>
+<div id="pageLoader" class="overlay">
+    <div style="position: relative;left: 50%;top:50%;" class="spinner-border text-dark m-1" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+
+<div class="row" style="margin-bottom: 5px;">
+    <div class="col-12">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-center">
+
+                    <h3 class="mt-3 mb-1">Saison - @saison.Name</h3>
+                    <div class="row">
+
+                        <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="mt-4">
+                                <p class="mb-1">Date de début :</p>
+                                <h5 class="font-size-16">@startDate (UTC)</h5>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="mt-4">
+                                <p class="mb-1">Date de fin :</p>
+                                <h5 class="font-size-16">@endDate (UTC)</h5>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="mt-4">
+                                <p class="mb-1">Classement rafraîchit le :</p>
+                                <h5 class="font-size-16">@ladderGeneratedOn  (Paris Time)</h5>
+                            </div>
+
+                        </div>
+                      
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+    </div>
+        
+</div>
+<div class="row" style="margin-bottom: 5px;">
+    <div class="col-sm-12 col-lg-6 col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div style="float: left;">
+                    <span style="font-size: 86px;">#@Model.PositionRank</span>
+                </div>
+                <div class="text-center">
+                   
+                 
+                    <div>
+                        <img src="@Model.Member.AvatarUrl" alt="" class="avatar-lg rounded-circle img-thumbnail" />
+                    </div>
+                       
+                    <h5 class="mt-3 mb-1">@playerName</h5>
+                 
+
+                  
+                </div>
+
+                <hr class="my-4">
+                <div class="row">
+                    <div class="text-muted col-md-6 col-sm-12 col-lg-4">
+                        <h5 class="font-size-16">Détail des points</h5>
+                        <div class="table-responsive mt-4">
+                            <div class="mt-4">
+                                <p class="mb-1">Total des points :</p>
+                                <h5 class="font-size-16">@Model.MontantTotalPepite</h5>
+                            </div>
+                            <div>
+                                <p class="mb-1">Points Attaques :</p>
+                                <h5 class="font-size-16">@Model.MontantAtkPepites</h5>
+                            </div>
+                            <div class="mt-4">
+                                <p class="mb-1">Points défenses :</p>
+                                <h5 class="font-size-16">@Model.MontantDefPepites</h5>
+                            </div>
+                            @if (Model.BonusPepite != 0 && Model.BonusPepite.HasValue)
+                            {
+                                <div class="mt-4">
+                                    <p class="mb-1">Points Bonus/Malus :</p>
+                                    <h5 class="font-size-16">@Model.BonusPepite</h5>
+                                    <p class="mb-1">@Model.bonusReason</p>
+                                </div>
+                                
+                            }
+                           
+
+                        </div>
+                    </div>
+                    <div class="text-muted col-md-6 col-sm-12 col-lg-4">
+                        <h5 class="font-size-16">Détail des screens</h5>
+                        <div class="table-responsive mt-4">
+                          
+                            <div class="mt-4">
+                                <p class="mb-1">Nombre d'attaques :</p>
+                                <h5 class="font-size-16">@Model.Nombre_attaques</h5>
+                            </div>
+                            <div class="mt-4">
+                                <p class="mb-1">Nombre de défenses:</p>
+                                <h5 class="font-size-16">@Model.Nombre_defense</h5>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+              
+               
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 col-lg-6 col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div style="width: 100%;height:100%;">
+                    <canvas id="activitychart"></canvas>
+                </div>
+
+               
+             
+
+
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+
+<div class="row">
+    <input id="allianceid"
+           name="allianceid"
+           type="hidden"
+           value="@ViewContext.RouteData.Values["allianceid"].ToString()" />
+    <input asp-for="Id" type="text" disabled="disabled" hidden="hidden" />
+    <div class="col-lg-12">
+
+        <div class="table-responsive mb-4">
+            <table id="datatable-buttons" class="table table-centered datatable dt-responsive nowrap table-card-list" style="border-collapse: collapse; border-spacing: 0 12px; width: 100%;">
+                <thead>
+                    <tr class="bg-transparent">
+                        <th>Screen</th>
+                         <th>Type</th>
+                        <th>Alliance Adverse</th>
+                        <th>Mode</th>
+                        <th>Statut</th>
+                        <th>Valeur</th>
+                        <th>Enregistré le</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+
+
+@section scripts {
+    <script src="~/assets/libs/moment/min/moment.min.js"></script>
+    <script src="~/assets/libs/moment/locale/fr-ca.js"></script>
+    <!-- Required datatable js -->
+    <script src="~/assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+
+    <script src="~/assets/libs/chart.js/chart.umd.min.js"></script>
+
+
+    <!-- Buttons examples -->
+    <script src="~/assets/libs/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="~/assets/libs/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/assets/libs/jszip/jszip.min.js"></script>
+    <script src="~/assets/libs/pdfmake/build/pdfmake.min.js"></script>
+    <script src="~/assets/libs/pdfmake/build/vfs_fonts.js"></script>
+    <script src="~/assets/libs/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="~/assets/libs/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="~/assets/libs/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+
+
+    <!-- Responsive examples -->
+    <script src="~/assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/assets/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
+
+    <script src="~/assets/libs/datatables.net-moment/js/datetime.js"></script>
+
+    <script src="~/assets/js/views/saison/detailranking.js"></script>
+
+}

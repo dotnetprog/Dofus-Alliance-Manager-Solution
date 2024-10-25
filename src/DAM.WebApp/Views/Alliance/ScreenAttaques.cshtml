@@ -1,0 +1,155 @@
+﻿@{
+    ViewData["Title"] = "Attaques";
+    ViewBag.Title = "Attaques";
+    ViewBag.pTitle = "Attaques";
+    ViewBag.pageTitle = "Alliances";
+
+}
+@section styles{
+    <link href="~/assets/libs/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
+    <link href="~/assets/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/libs/select2/css/select2-bootstrap-5-theme.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/toastr/build/toastr.min.css">
+    <!-- Lightbox css -->
+    <link href="~/assets/libs/magnific-popup/magnific-popup.css" rel="stylesheet" type="text/css" />
+    <style>
+        .float-start {
+            float: left !important;
+        }
+
+        i.fa-fist-raised {
+            color: red;
+        }
+
+        i.fa-times-circle {
+            color: red;
+        }
+
+        i.fa-check-circle {
+            color: green;
+        }
+
+        #screenGrid > div > div.card {
+            height: 97%;
+        }
+
+        img.img-thumbnail {
+            max-height: 300px !important;
+            width: 100% !important;
+        }
+    </style>
+}
+<input id="allianceid"
+       name="allianceid"
+       type="hidden"
+       value="@ViewContext.RouteData.Values["allianceid"]?.ToString()" />
+
+<div class="row">
+    <div class="col-lg-12">
+        <div id="filter-accordion" class="custom-accordion">
+            <div class="card">
+                <a href="#filterconfig-collapse" class="text-dark" data-bs-toggle="collapse" aria-expanded="true" aria-controls="filterconfig-collapse">
+                    <div class="p-4">
+
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0 me-3">
+                                <div class="avatar-xs">
+                                    <div class="avatar-title rounded-circle bg-soft-primary text-primary">
+                                        01
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <h5 class="font-size-16 mb-1">Paramètres</h5>
+                                <p class="text-muted text-truncate mb-0">Configurer le filtre ci-dessous</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="mdi mdi-chevron-up accor-down-icon font-size-24"></i>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </a>
+                <div id="filterconfig-collapse" class="card-body collapse show" data-bs-parent="#filter-accordion">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label" for="processingstate">Par statut de traitement</label>
+                            <select id="processingstate" class="form-select" data-placeholder="Choisir un statut" multiple>
+                                <option value="Pending">En attente</option>
+                                <option value="Processing">En cours</option>
+                                <option value="Completed">Terminé</option>
+                            </select>
+
+
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="resultstate">Par statut de validation</label>
+                            <select id="resultstate" data-placeholder="Choisir un statut" class="form-select" multiple>
+                                <option value="-1">None</option>
+                                <option value="Valid">Validé automatiquement</option>
+                                <option value="NotValid">Refusé automatiquement</option>
+                                <option value="ManualyValid">Validé manuellement</option>
+                                <option value="ManualyInvalid">Refusé manuellement</option>
+                            </select>
+
+
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Par date début et date de fin</label>
+                            <div class="input-daterange input-group" id="datepicker6" data-date-format="dd/mm/yyyy" data-date-autoclose="true" data-provide="datepicker" data-date-container='#datepicker6'>
+                                <input type="text" id="From" class="form-control text-start" placeholder="From" name="From" />
+                                <input type="text" id="To" class="form-control text-start" placeholder="To" name="To" />
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">Par joueur</label>
+
+                            <select id="playersearch" data-placeholder="Recherche par joueur..." class="form-select" multiple>
+                                        
+                            </select>
+
+                        </div>
+                    </div>
+                    <div style="margin-top: 120px;" class="row">
+                        <div class="row mb-4">
+                            <div class="col ms-auto">
+                                <div class="d-flex flex-reverse flex-wrap gap-2">
+                                    <button id="submit" class="btn btn-primary"> <i class="mdi mdi-filter-variant"></i> Filtrer</button>
+                                </div>
+                            </div> <!-- end col -->
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<div id="screenGrid" class="row">
+</div>
+<!-- end row -->
+
+<div id="LoadMoreIndicator" style="display:none;" class="row mt-3">
+    <div class="col-xl-12">
+        <div class="text-center my-3">
+            <a href="javascript:void(0)" id="LoadNext" class="text-primary"><i class="mdi mdi-loading mdi-spin font-size-20 align-middle me-2"></i> Load more </a>
+        </div>
+    </div>
+</div>
+<!-- end row -->
+@section scripts{
+    <!-- bootstrap datepicker -->
+    <script src="~/assets/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/assets/libs/magnific-popup/jquery.magnific-popup.min.js"></script>
+
+    <script src="~/assets/libs/select2/js/select2.full.min.js"></script>
+    <script src="~/assets/libs/moment/min/moment.min.js"></script>
+    <script src="~/assets/libs/moment/locale/fr-ca.js"></script>
+    <script src="~/assets/libs/toastr/build/toastr.min.js"></script>
+    <script src="~/assets/js/views/alliance/attaques.js"></script>
+}

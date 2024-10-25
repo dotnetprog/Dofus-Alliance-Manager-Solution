@@ -1,0 +1,269 @@
+﻿@using DAM.Domain.Entities
+@using Discord.Rest
+@model DAM.WebApp.Models.Saison.EditSaisonViewModel
+
+@{
+    var label = $"Saison - {Model.Name}";
+    ViewData["Title"] = label;
+    ViewBag.Title = "Modifier " + label;
+    ViewBag.pTitle = label;
+    ViewBag.pageTitle = "Saisons";
+    var baremes = ViewBag.Baremes as IEnumerable<Bareme>;
+
+}
+@section styles {
+
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/toastr/build/toastr.min.css">
+    <!-- bootstrap-datepicker css -->
+    <link href="~/assets/libs/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
+
+
+    <!-- DataTables -->
+    <link href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Responsive datatable examples -->
+    <link href="~/assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+}
+
+<style>
+    .overlay {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+        background: black;
+        opacity: .5;
+        z-index: 400;
+    }
+
+    .overlayRow {
+        background: black;
+        opacity: .5;
+    }
+
+    table.dataTable > tbody > tr {
+        position: relative;
+    }
+
+</style>
+<div id="pageLoader" class="overlay">
+    <div style="position: relative;left: 50%;top:50%;" class="spinner-border text-dark m-1" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+
+
+<div class="row">
+    <div id='serverErrors' class="col-12">
+       
+
+    </div>
+    <div class="col-12">
+        <div class="card">
+
+            <div class="card-body">
+                <input id="allianceid"
+                       name="allianceid"
+                       type="hidden"
+                       value="@ViewContext.RouteData.Values["allianceid"].ToString()" />
+
+                <form action="" id="form" data-parsley-validate>
+                    <input asp-for="Id" type="text" disabled="disabled" hidden="hidden" />
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-12">
+                            <div class="row">
+                                <div class="col-12 needs-validation">
+                                    <label for="Name" class="form-label">Nom</label>
+                                    <input asp-for="Name" class="form-control" type="text" name="Name"  required>
+                                    <div class="invalid-feedback">
+                                        Le nom est obligatoire
+                                    </div>
+                                </div>
+                                <div class="col-12 needs-validation">
+                                    <label class="form-label">Description</label>
+                                    <textarea asp-for="Description" name="Description"  required="" class="form-control" rows="5" required></textarea>
+                                    <div class="invalid-feedback">
+                                        La description est obligatoire
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12">
+                            <div class="row">
+                                <div class="col-12 needs-validation">
+                                    <label for="StartDate" class="form-label">Date de début</label>
+                                    <input class="form-control" asp-for="StartDate" type="date"  name="StartDate" required>
+                                    <span style="color:red;" asp-validation-for="StartDate"></span>
+                                    <div class="invalid-feedback">
+                                        La date de début est obligatoire
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 needs-validation">
+                                <label for="EndDate" class="form-label">Date de Fin</label>
+                                <input class="form-control" asp-for="EndDate" type="date" name="EndDate"  required>
+                                <span style="color:red;" asp-validation-for="EndDate"></span>
+                                <div class="invalid-feedback">
+                                    La date de fin est obligatoire
+                                </div>
+                            </div>
+                        </div>
+                       
+                       
+                        
+                        
+                    </div>
+                   <div class="row">
+                       <div class="col-lg-6 col-md-6 col-sm-12">
+
+                            <div class="mb-3 needs-validation">
+                                <label class="col-md-2 form-label">Canal publication</label>
+                                @{
+                                    var txtChannels = ViewBag.TextChannels as IReadOnlyCollection<RestGuildChannel>;
+                                    var List = txtChannels.Select(c => new SelectListItem
+                                    {
+                                        Text = c.Name,
+                                        Value = c.Id.ToString(),
+                                        Selected = c.Id.ToString() == Model.SelectedChannelId
+                                    });
+                                    @Html.DropDownListFor(Model => Model.SelectedChannelId, List, "Select", new { @class = "form-select", @required = "required" })
+                                }
+                                <div class="invalid-feedback">
+                                    Le canal publication est obligatoire
+                                </div>
+                            </div>
+                       </div>
+                   </div>
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12">
+
+                            <div class="mb-3">
+                                <label class="form-label" for="productname">
+                                    <span style="margin-right: 5px;">
+                                        <i title="attaque" style="color:red" class="fas fa-fist-raised"></i></span>
+                                        Barème attaque (Facultatif)
+                                </label>
+                                @{
+
+                                    var baremeAttaquelist = baremes.Where(b => b.Type == BaremeType.Attaque || !b.Type.HasValue)
+                                    .Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString(),
+                Selected = c.Id == Model.BaremeAttackId
+            });
+                                    @Html.DropDownListFor(Model => Model.BaremeAttackId, baremeAttaquelist, "Select", new { @class = "form-control select2" })
+
+
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+
+                            <div class="mb-3">
+                                <label class="form-label" for="productname">
+                                    <span style="margin-right: 5px;">
+                                        <i title="defence" style="color:blue" class="bx bx-shield-alt-2"></i>
+                                    </span>
+                                    Barème défense (Facultatif)</label>
+                                @{
+
+                                    var baremedefenseelist = baremes.Where(b => b.Type == BaremeType.Defense || !b.Type.HasValue)
+                                    .Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString(),
+                Selected = c.Id == Model.BaremeDefenseId
+            });
+                                    @Html.DropDownListFor(Model => Model.BaremeDefenseId, baremedefenseelist, "Select", new { @class = "form-control select2" })
+
+
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top:15px;">
+                        <input id="saveBtn" type="submit" value="Sauvegarder" class="btn btn-primary" />
+                    </div>
+                </form>
+
+
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="col-12">
+        <div class="d-flex flex-wrap gap-2">
+            <button id="refreshBtn" type="button" class="btn btn-primary waves-effect waves-light mb-3"><i class="fas fa-sync me-1"></i>Rafraichîr le classement</button>
+            <button id="publishDiscordBtn" type="button" style="background-color:#313338;color:#f5f6f8;" class="btn waves-effect waves-light mb-3"><i class="fab fa-discord me-1"></i>Publier</button>
+        </div>
+       
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+
+            <div class="card-body">
+
+
+                <h4 class="card-title mb-4">Classement des joueurs</h4>
+                <div id="leaderboardTable" class="table-responsive">
+                    <table class="table table-centered table-nowrap mb-0 dataTable">
+                    </table>
+                </div>
+
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="bonusModal" tabindex="-1" aria-labelledby="bonusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bonusModalLabel">Bonus pour</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form data-parsley-validate>
+                    <input type="text" style="display:none;" id="saisonrankingid">
+                    <div class="form-group">
+                        <label for="recipient-name" class="col-form-label">Nombre de points:</label>
+                        <input type="number" class="form-control" id="bonus">
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Raison:</label>
+                        <textarea data-parsley-validate-if-empty="true"
+                                  data-parsley-required-if="#bonus" class="form-control" id="reason-text"></textarea>
+                       
+                        <div class="invalid-feedback">
+                            La raison est requise afin d'appliquer un bonus/malus.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary">Mettre à jour</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+    <!-- parsleyjs -->
+    <script src="~/assets/js/customlibs/bootstrapcustomdatatable.js"></script>
+    <script src="~/assets/libs/toastr/build/toastr.min.js"></script>
+    <script src="~/assets/libs/parsleyjs/parsley.min.js"></script>
+    <script src="~/assets/js/views/saison/edit.js"></script>
+
+}

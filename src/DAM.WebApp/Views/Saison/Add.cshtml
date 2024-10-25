@@ -1,0 +1,172 @@
+﻿@using DAM.Domain.Entities
+@using Discord.Rest
+@model DAM.WebApp.Models.Saison.CreateSaisonViewModel
+
+@{
+    ViewData["Title"] = "Création d'une saison";
+    ViewBag.Title = "Ajouter une nouvelle saison";
+    ViewBag.pTitle = "Nouvelle saison";
+    ViewBag.pageTitle = "Saison";
+    var baremes = ViewBag.Baremes as IEnumerable<Bareme>;
+
+}
+@section styles{
+   
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/toastr/build/toastr.min.css">
+    <!-- bootstrap-datepicker css -->
+    <link href="~/assets/libs/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
+
+
+    <!-- DataTables -->
+    <link href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Responsive datatable examples -->
+    <link href="~/assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+
+}
+
+
+
+
+
+<div class="row">
+
+    <div class="col-12">
+        <div class="card">
+
+            <div class="card-body">
+
+                
+                <form asp-action="Add" id="form" data-parsley-validate>
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12">
+                            <div class="mb-3 needs-validation">
+                                <label for="Name" class="col-md-2 form-label">Nom</label>
+                                <input class="form-control" type="text" asp-for="Name" required>
+                                <div class="invalid-feedback">
+                                    Le nom est obligatoire
+                                </div>
+                            </div>
+
+                            <div class="mb-3 needs-validation">
+                                <label class="col-md-2 form-label">Canal publication</label>
+                                @{
+                                    var txtChannels = ViewBag.TextChannels as IReadOnlyCollection<RestGuildChannel>;
+                                    var atkList = txtChannels.Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString(),
+                Selected = c.Id.ToString() == Model.SelectedChannelId
+            });
+                                    @Html.DropDownListFor(Model => Model.SelectedChannelId, atkList, "Select", new { @class = "form-select", @required = "required" })
+                                }
+                                <div class="invalid-feedback">
+                                    Le canal publication est obligatoire
+                                </div>
+                            </div>
+
+                            <div class="mb-3 needs-validation">
+                                <label class="col-md-2 form-label">Description</label>
+                                <textarea asp-for="Description" required="" class="form-control" rows="5" required></textarea>
+                                <div class="invalid-feedback">
+                                    La description est obligatoire
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="mb-3 needs-validation">
+                                <label for="StartDate" class="col-md-2 form-label">Date de début</label>
+                                <input id="StartDate" name="StartDate" class="form-control" type="date" required>
+                                <span style="color:red;" asp-validation-for="StartDate"></span>
+                                <div class="invalid-feedback">
+                                    La date de début est obligatoire
+                                </div>
+                            </div>
+                            <div class="mb-3 needs-validation">
+                                <label for="EndDate" class="col-md-2 form-label">Date de Fin</label>
+                                <input class="form-control" type="date" id="EndDate" name="EndDate" required>
+                                <span style="color:red;" asp-validation-for="EndDate"></span>
+                                <div class="invalid-feedback">
+                                    La date de fin est obligatoire
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="productname">
+                                    <span style="margin-right: 5px;">
+                                        <i title="attaque" style="color:red" class="fas fa-fist-raised"></i>
+                                    </span>
+                                    Barème attaque (Facultatif)
+                                </label>
+                                @{
+
+                                    var baremeAttaquelist = baremes.Where(b => b.Type == BaremeType.Attaque || !b.Type.HasValue)
+                                    .Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString(),
+                Selected = c.Id == Model.BaremeAttackId
+            });
+                                    @Html.DropDownListFor(Model => Model.BaremeAttackId, baremeAttaquelist, "Select", new { @class = "form-control select2" })
+
+
+                                }
+
+
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="productname">
+                                    <span style="margin-right: 5px;">
+                                        <i title="defence" style="color:blue" class="bx bx-shield-alt-2"></i>
+                                    </span>
+                                    Barème défense (Facultatif)</label>
+                                @{
+
+                                    var baremedefenseelist = baremes.Where(b => b.Type == BaremeType.Defense || !b.Type.HasValue)
+                                    .Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString(),
+                Selected = c.Id == Model.BaremeDefenseId
+            });
+                                    @Html.DropDownListFor(Model => Model.BaremeDefenseId, baremedefenseelist, "Select", new { @class = "form-control select2" })
+
+
+                                }
+
+
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                   
+                    
+               
+              
+             
+              
+                  
+
+                    <div class="form-group">
+                        <input type="submit" value="Soumettre" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+    
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+@section scripts{
+    <!-- parsleyjs -->
+    <script src="~/assets/libs/toastr/build/toastr.min.js"></script>
+    <script src="~/assets/libs/parsleyjs/parsley.min.js"></script>
+    <script src="~/assets/js/views/saison/add.js"></script>
+
+}

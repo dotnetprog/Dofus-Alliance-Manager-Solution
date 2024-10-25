@@ -1,0 +1,14 @@
+{
+  "commands": {
+    "AddMigigrationScript": {
+      "fileName": "cmd.exe",
+      "workingDirectory": ".",
+      "arguments": "/c DAM.Database\\EFScripts\\AddMigigrationScript.bat"
+    },
+    "UpdateDatabase": {
+      "fileName": "cmd.exe",
+      "workingDirectory": ".",
+      "arguments": "/c DAM.Database\\EFScripts\\UpdateDatabase.bat"
+    }
+  }
+}

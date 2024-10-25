@@ -1,0 +1,153 @@
+﻿@using DAM.WebApp.OAuth.Discord.Services;
+@using Discord
+@using Discord.Rest;
+
+<!-- ========== Left Sidebar Start ========== -->
+<div class="vertical-menu">
+
+    <!-- LOGO -->
+    
+    <div class="navbar-brand-box">
+        <a href="@Url.Action("Index", "alliance")" class="logo logo-dark">
+            <span class="logo-sm">
+                <img src="~/assets/images/logo-sm.png" alt="" height="22">
+            </span>
+            <span class="logo-lg">
+                <img src="~/assets/images/logo-dark.png" alt="" height="20">
+            </span>
+        </a>
+
+        <a href="@Url.Action("Index", "alliance")" class="logo logo-light">
+           @* <span class="logo-sm">
+                <img src="~/assets/images/logo-sm.png" alt="" height="22">
+            </span>
+            <span class="logo-lg">
+                <img src="~/assets/images/logo-light.png" alt="" height="20">
+            </span>*@
+            @{
+               
+                if(User.Identity.IsAuthenticated && ViewBag.Alliance is not null)
+                {
+                    var selectedGuild = ViewBag.Alliance;
+                    <span style="color:white;"  class="logo-sm">
+                        <img class="rounded-circle" src="@selectedGuild.IconUrl" alt="" height="30" width="30">
+                    </span>
+                    <span style="color:white;" class="logo-lg">
+                        <img class="rounded-circle" src="@selectedGuild.IconUrl" alt="" height="30" width="30">
+                        @selectedGuild.Name
+                    </span>
+                }
+                else
+                {
+                    <span style="color:white;">DAM</span>
+                }
+
+            }
+           
+            
+        </a>
+    </div>
+
+    <button type="button" class="btn btn-sm px-3 font-size-16 header-item waves-effect vertical-menu-btn">
+        <i class="fa fa-fw fa-bars"></i>
+    </button>
+
+    <div data-simplebar class="sidebar-menu-scroll">
+
+        <!--- Sidemenu -->
+        <div id="sidebar-menu">
+            <!-- Left Menu Start -->
+            <ul class="metismenu list-unstyled" id="side-menu">
+                <li class="menu-title">Menu</li>
+                <li>
+                @{
+                    if (User.Identity.IsAuthenticated)
+                    {
+                      
+                            <a href="@Url.Action("Index", "alliance")">
+                                <i class="uil-home-alt"></i>
+                                <span>Mes alliances</span>
+                            </a>
+                        
+                    }
+                    else
+                    {
+                        <a asp-controller="alliance" asp-action="">
+                                <i class="fab fa-discord"></i>
+                                <span>Log In</span>
+                        </a>
+                    }
+                }
+                </li>
+                @{
+                    if (User.Identity.IsAuthenticated && ViewBag.Alliance != null)
+                    {
+                        <li>
+                            <a href="@Url.Action("Dashboard", "alliance",new { allianceid = ViewBag.Alliance.Id },null)">
+                                <i class="uil-chart-growth"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("Configuration", "alliance",new { allianceid = ViewBag.Alliance.Id },null)">
+                                <i class="uil-cog"></i>
+                                <span>Configuration</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("Index","saison",new { allianceid = ViewBag.Alliance.Id },null)">
+                                <i class="bx bx-trophy"></i>
+                                <span>Saisons</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("ScreenDefenses","alliance",new { allianceid = ViewBag.Alliance.Id },null)">
+                                <i class="bx bx-shield-alt-2"></i>
+                                <span>Defenses</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("ScreenAttaques","alliance",new { allianceid = ViewBag.Alliance.Id },null)">
+                                <i class="fas fa-fist-raised"></i>
+                                <span>Attaques</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("Index","ava",new { allianceid = ViewBag.Alliance.Id },null)">
+                                <i class="dripicons-flag"></i>
+                                <span>AvA</span>
+                        </a>
+                            
+                        </li>
+                        <li>
+                            <a href="@Url.Action("Reports","alliance",new { allianceid = ViewBag.Alliance.Id },null)" >
+                                <i class="bx bxs-report"></i>
+                                <span>Rapports</span>
+                            </a>
+                        </li>
+                         <li>
+                            <a href="@Url.Action("Index","integration",new { allianceid = ViewBag.Alliance.Id },null)">
+                                <i class="dripicons-network-3"></i>
+                                <span>Intégrations</span>
+                            </a>
+                        </li>
+                        
+                       
+                    }
+                }
+               
+               
+
+              
+
+              
+
+            </ul>
+        </div>
+        <!-- Sidebar -->
+    </div>
+</div>
+<!-- Left Sidebar End -->
+
+
+

@@ -1,0 +1,40 @@
+﻿@using System.Security.Claims;
+
+
+    @*@if (User.Claims.Any(c => c.Type == ClaimTypes.NameIdentifier))
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="alliance" asp-action="" >Hello @User.Claims.First(c => c.Type == ClaimTypes.Name).Value</a>
+        </li>
+       
+    }*@
+    @if (User.Identity.IsAuthenticated)
+    {
+       
+        <div class="dropdown d-inline-block">
+            <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
+                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                @{
+                    var imageClaim = User.Claims.FirstOrDefault(c => c.Type == "urn:discord:avatar:url");
+                    if (imageClaim != null)
+                    {
+                        <img class="rounded-circle header-profile-user" height="30" width="30" src="@imageClaim.Value"
+                    alt="Header Avatar" />
+                }
+            }
+            @{
+                var username = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value ?? User.Identity.Name;
+                <span class="d-none d-xl-inline-block ms-1 fw-medium font-size-15">@username</span>
+            }
+                
+                <i class="uil-angle-down d-none d-xl-inline-block font-size-15"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <!-- item-->
+                <a class="dropdown-item" href="@Url.Action("LogOut","Home")"><i class="uil uil-sign-out-alt font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">Sign out</span></a>
+            </div>
+        </div>
+
+    }
+   
+

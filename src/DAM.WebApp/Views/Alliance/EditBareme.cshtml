@@ -1,0 +1,191 @@
+﻿@using DAM.Domain.Entities;
+@using Microsoft.OData.Edm;
+@model DAM.WebApp.Models.Alliance.BaremeViewModel
+
+@{
+    ViewData["Title"] = "Modifier un barème";
+    ViewBag.Title = "Modifier d'un barème";
+    ViewBag.pTitle = "Modifier le barème";
+    ViewBag.pageTitle = "Alliances";
+
+}
+
+@section styles{
+    <link href="~/assets/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/libs/select2/css/select2-bootstrap-5-theme.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/toastr/build/toastr.min.css">
+    <style>
+        table.matrix > thead > tr > th {
+            background: lightgrey;
+        }
+
+        table.matrix > tbody > tr > td:first-child {
+            background-color: lightgray;
+            font-weight: 600;
+        }
+
+        table, th, td {
+            border: 1px solid black !important;
+            border-collapse: collapse;
+        }
+
+        .toast {
+            opacity: 1 !important;
+        }
+    </style>
+
+}
+<div class="row">
+
+    <div class="col-xl-6">
+        <div class="card">
+
+            <div class="card-body">
+
+                <h4 class="card-title">Information du barème</h4>
+                <input id="allianceid"
+                       name="allianceid"
+                       type="hidden"
+                       value="@ViewContext.RouteData.Values["allianceid"].ToString()" />
+                <div class="row">
+                    @Html.HiddenFor(Model => Model.Id)
+                    <div class="col-md-6">
+                        <div class="mb-3 needs-validation">
+                            <label class="form-label" for="Name">Nom du barème</label>
+                            <input type="text" class="form-control" id="Name" value="@Model.Name" placeholder="Name" required>
+                            <div class="invalid-feedback">
+                                Le champs Nom est obligatoire
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3 needs-validation">
+                            <label class="form-label" for="BaremeType">Type de barème</label>
+
+
+                            <select asp-for="BaremeType" asp-items="Html.GetEnumSelectList<BaremeType>()" required class="form-select">
+                                <option selected="selected" value="">Choisir</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Le type est obligatoire
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="card">
+
+            <div class="card-body">
+
+                <h4 class="card-title">Alliance ennemies</h4>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+
+                            <select id="Enemies" class="form-select" data-placeholder="Associer alliance adverse" multiple>
+                                @{
+                                    var enemies = ViewBag.AllEnemies as IReadOnlyCollection<AllianceEnemy>;
+                                    foreach (var e in enemies)
+                                    {
+                                        var hasEnemy = (Model.Enemies?.Any(me => me == e.Id)) ?? false;
+                                        if (hasEnemy)
+                                        {
+                                            <option selected="selected" value="@e.Id">@e.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@e.Id">@e.Name</option>
+                                        }
+
+                                    }
+
+
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+
+                <h4 class="card-title">Configuration du barème</h4>
+
+
+                <div class="table-responsive">
+                    <table class="table table-editable table-nowrap align-middle table-edits matrix">
+                        <thead>
+                            <tr style="cursor: pointer;">
+                                <th></th>
+                                <th>0 ennemi </th>
+                                <th>1 ennemis </th>
+                                <th>2 ennemis </th>
+                                <th>3 ennemis </th>
+                                <th>4 ennemis </th>
+                                <th>5 ennemis </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @{
+
+                                for (var a = 1; a <= 5; a++)
+                                {
+                                    <tr data-id="@a">
+                                        <td>@a Allié(s)</td>
+
+                                        @for (var e = 0; e <= 5; e++)
+                                        {
+                                            var detail = Model.baremeDetails.First(b => b.AllyCount == a && b.EnemyCount == e);
+                                            
+                                            <td  class="needs-validation">
+                                                <input data-parsley-type="number" recordid="@detail.Id" class="form-control" type="number" value="@detail.NbPepites">
+                                                <div class="invalid-feedback">
+                                                    Ce n'est pas une valeur valide
+                                                </div>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div> <!-- end col -->
+
+</div>
+<div class="row mb-4">
+    <div class="col ms-auto">
+        <div class="d-flex flex-reverse flex-wrap gap-2">
+            <button id="saveBtn" class="btn btn-success"> <i class="uil uil-file-alt"></i>Sauvegarder</button>
+        </div>
+    </div> <!-- end col -->
+</div>
+@section scripts{
+    <script src="~/assets/libs/select2/js/select2.full.min.js"></script>
+    <!-- parsleyjs -->
+    <script src="~/assets/libs/toastr/build/toastr.min.js"></script>
+    <script src="~/assets/libs/parsleyjs/parsley.min.js"></script>
+    <script src="~/assets/libs/table-edits/build/table-edits.min.js"></script>
+    <script src="~/assets/js/views/alliance/editbareme.js"></script>
+
+}

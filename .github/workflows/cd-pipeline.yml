@@ -1,0 +1,143 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: deploy workflow
+on:
+   workflow_call:
+    inputs:
+      deployWorkService:
+        required: true
+        type: boolean
+      solutionPath:
+        required: true
+        type: string
+      solutionFolder:
+        required: true
+        type: string
+      webappName:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+    secrets:
+      APP_INSIGHTS_CONNECTIONSTRING:
+       required: true
+      DATABASE_PASSWORD:
+       required: true
+      DAM_DISCORD_CLIENTSECRET:
+       required: true
+      DAM_DISCORD_BOTTOKEN:
+        required: true
+      DAM_JWT_ENCRYPTIONKEY:
+       required: true
+      REGISTRY_LOGIN_SERVER:
+        required: true
+      REGISTRY_USERNAME:
+        required: true
+      REGISTRY_PASSWORD:
+        required: true
+      AZURE_RESOURCE_GROUP:
+        required: true
+      AZURE_SERVICE_CREDENTIALS:
+        required: true
+      AZURE_PUBLISH_WEBAPPPROFILE:
+        required: true
+      
+jobs:
+  Deployment:
+    name: Deployment
+    runs-on: ubuntu-latest
+    environment:
+        name: ${{ inputs.environment }}
+        url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+   
+    steps:
+        - uses: actions/checkout@v3
+        - name: Setup .NET
+          uses: actions/setup-dotnet@v3
+          with:
+            dotnet-version: 8.0.x
+        - name: Download artifact from build job
+          uses: actions/download-artifact@v3
+          with:
+            name: webapp
+            path: '${{ github.workspace }}/webapp'
+        - name: 'Login via Azure CLI'
+          uses: azure/login@v1
+          if: ${{ inputs.deployWorkService }}
+          with:
+            creds: ${{ secrets.AZURE_SERVICE_CREDENTIALS }}
+        - name: Restore dependencies
+          run: dotnet restore ${{ github.workspace }}/${{  inputs.solutionPath  }}
+        - name: Build
+          run: dotnet build ${{ github.workspace }}/${{  inputs.solutionPath  }} --configuration Release --no-restore
+
+        - name: Replace tokens
+          uses: cschleiden/replace-tokens@v1
+          with:
+            tokenPrefix: '${'
+            tokenSuffix: '}$'
+            files: '["**/*.json"]'
+          env:
+            database_hostname: ${{ vars.DATABASE_HOSTNAME }}
+            database_username: ${{ vars.DATABASE_USER  }}
+            database_name: ${{ vars.DATABASE_NAME }}
+            DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+            SWAGGER_ENABLED: ${{ vars.SWAGGER_ENABLED }}
+            DAM_DISCORD_CLIENTID: ${{ vars.DAM_DISCORD_CLIENTID }}
+            DAM_DISCORD_CLIENTSECRET: ${{ secrets.DAM_DISCORD_CLIENTSECRET }}
+            DAM_DISCORD_BOTTOKEN: ${{ secrets.DAM_DISCORD_BOTTOKEN }}
+            DAM_JWT_ENCRYPTIONKEY: ${{ secrets.DAM_JWT_ENCRYPTIONKEY }}
+            DAM_WEBAPP_URL: ${{ vars.DAM_WEBAPP_URL }}
+            APP_INSIGHTS_CONNECTIONSTRING: ${{ vars.APP_INSIGHTS_CONNECTIONSTRING }}
+
+        - name: 'Connect to Azure container registry'
+          uses: azure/docker-login@v1
+          if: ${{ inputs.deployWorkService }}
+          with:
+            login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            username: ${{ secrets.REGISTRY_USERNAME }}
+            password: ${{ secrets.REGISTRY_PASSWORD }}
+        - name: 'Build and Push Image' 
+          if: ${{ inputs.deployWorkService }}
+          run: |
+            cd ${{ github.workspace }}/${{ inputs.solutionFolder }}
+            docker build -f 'DAM.Bot/Dockerfile' -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/damtestbot:${{ github.sha }} .
+            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/damtestbot:${{ github.sha }}
+        - name: 'Deploy to Azure Container Instances'
+          if: ${{ inputs.deployWorkService }}
+          uses: 'azure/aci-deploy@v1'
+          with:
+            resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
+            dns-name-label: ${{ secrets.AZURE_RESOURCE_GROUP }}${{ github.run_number }}
+            image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/damtestbot:${{ github.sha }}
+            registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            registry-username: ${{ secrets.REGISTRY_USERNAME }}
+            registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+            name: aci-dambot${{ inputs.environment }}
+            location: 'east us'
+        - name: Update database
+          run: |
+            cd ${{ github.workspace }}/${{ inputs.solutionFolder }}/DAM.Database
+            dotnet tool install --global dotnet-ef --version 7.0.*
+            dotnet ef database update --no-build --configuration Release
+          env:
+            ASPNETCORE_ENVIRONMENT: Production
+        
+
+
+        - name: Deploy to Azure Web App
+          id: deploy-to-webapp
+          uses: azure/webapps-deploy@v2
+          with:
+              app-name: ${{ inputs.webappName }}
+              slot-name: 'Production'
+              publish-profile: ${{ secrets.AZURE_PUBLISH_WEBAPPPROFILE }}
+              package: '${{ github.workspace }}/webapp'
+
+
+
+  
+    
+  

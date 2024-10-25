@@ -1,0 +1,234 @@
+﻿@using DAM.WebApp.Models.Alliance;
+@model SummaryReportViewModel
+@{
+    ViewData["Title"] = "Alliance - Rapports";
+    ViewBag.Title = "Rapports";
+    ViewBag.pTitle = "Rapports";
+    ViewBag.pageTitle = "Alliances";
+
+}
+
+@section styles{
+    <!-- bootstrap-datepicker css -->
+    <link href="~/assets/libs/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/toastr/build/toastr.min.css">
+    <!-- DataTables -->
+    <link href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Responsive datatable examples -->
+    <link href="~/assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+    
+   
+}
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="card">
+
+            <div class="card-body">
+
+                <h4 class="card-title">Paramètres du rapport</h4>
+                <input id="allianceid"
+                       name="allianceid"
+                       type="hidden"
+                       value="@ViewContext.RouteData.Values["allianceid"].ToString()" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label" for="SelectedBaremeAttaqueId">Barème attaque <i style="color:red;" class="fas fa-fist-raised"></i></label>
+                        @{
+
+                            var baremeAttaquelist = Model.Baremes.Where(b => b.BaremeType == DAM.Domain.Entities.BaremeType.Attaque)
+                            .Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString(),
+                Selected = c.Id == Model.SelectedBaremeAttaqueId
+            });
+                            @Html.DropDownListFor(Model => Model.SelectedBaremeAttaqueId, baremeAttaquelist, "Select", new { @class = "form-control select2" })
+
+
+                        }
+                      
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="SelectedBaremeDefenseId">Barème défense <i style="color:blue;" class="bx bx-shield-alt-2"></i></label>
+                        @{
+                            var baremeDefencelist = Model.Baremes.Where(b => b.BaremeType == DAM.Domain.Entities.BaremeType.Defense)
+                            .Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString(),
+                Selected = c.Id == Model.SelectedBaremeDefenseId
+            });
+                            @Html.DropDownListFor(Model => Model.SelectedBaremeDefenseId, baremeDefencelist, "Select", new { @class = "form-control select2" })
+
+
+                        }
+
+
+                    </div>
+               
+                    
+                </div>
+                <div class="row" style="margin-top:10px;">
+                    <div class="col-6">
+                        <div class="form-group row">
+                            <label for="multiplier" class="col-sm-2 col-form-label">1 point =</label>
+                            <div class="col-sm-6">
+                                <input type="number" style="width:50%;display:inline;" id="multiplier" class="form-control text-start" placeholder="1" name="multiplier"  />
+                                <img src="~/assets/images/dofus/pepites_24x24.webp" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+               
+                <div class="row" style="margin-top:20px;">
+                    <div class="col-md-8 col-sm-12">
+                        <div class="mb-3">
+                            <div class="input-daterange input-group" id="datepicker6" data-date-format="dd/mm/yyyy" data-date-autoclose="true" data-provide="datepicker" data-date-container='#datepicker6'>
+                                <input type="text" id="From" class="form-control text-start" placeholder="From" name="From" />
+                                <input type="text" id="To" class="form-control text-start" placeholder="To" name="To" />
+                                <button type="button" id="submit" class="btn btn-primary"><i class="mdi mdi-filter-variant"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="card">
+
+            <div class="card-body">
+
+                <h4 class="card-title">Sommaires</h4>
+             
+                <div class="row">
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="Name">Somme des pépites :</label>
+                            <span id="totalpepites">0</span>
+
+                         
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="Name">Somme des pépites (Atk) :</label>
+                               <span id="totalpepitesAtk">0</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="Name">Somme des pépites (Def) :</label>
+                            <span id="totalpepitesDef">0</span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="Name">Somme des pépites (AvA) :</label>
+                            <span id="totalpepiteAvA">0</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="Name">Moyenne pépite par joueur :</label>
+                            <span id="averagepepite">0</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+   
+</div>
+<div class="row">
+    <div class="col-lg-12">
+
+        <div class="table-responsive mb-4">
+            <table id="datatable-buttons" class="table table-centered datatable dt-responsive nowrap table-card-list" style="border-collapse: collapse; border-spacing: 0 12px; width: 100%;">
+                <thead>
+                    <tr class="bg-transparent">
+                        <th>Membre Discord Id</th>
+                        <th>Membre Discord Name</th>
+                        <th>Total Defenses</th>
+                        <th>Total Attaques</th>
+                        <th>Total Participations AvA</th>
+                        <th>Montant Def Pépites</th>
+                        <th>Montant Atk Pépites</th>
+                        <th>Montant AvA Pépites</th>
+                        <th>Montant Total Pépites</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                   
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end row -->
+@section scripts{
+
+    <script src="~/assets/libs/moment/min/moment.min.js"></script>
+    <script src="~/assets/libs/moment/locale/fr-ca.js"></script>
+    <script src="~/assets/libs/toastr/build/toastr.min.js"></script>
+    <!-- bootstrap datepicker -->
+    <script src="~/assets/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+
+    <!-- Required datatable js -->
+    <script src="~/assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+
+
+    <!-- Buttons examples -->
+    <script src="~/assets/libs/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="~/assets/libs/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/assets/libs/jszip/jszip.min.js"></script>
+    <script src="~/assets/libs/pdfmake/build/pdfmake.min.js"></script>
+    <script src="~/assets/libs/pdfmake/build/vfs_fonts.js"></script>
+    <script src="~/assets/libs/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="~/assets/libs/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="~/assets/libs/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+
+
+    <!-- Responsive examples -->
+    <script src="~/assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/assets/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
+
+
+    
+
+
+    <script src="~/assets/js/views/alliance/reports.js"></script>
+}

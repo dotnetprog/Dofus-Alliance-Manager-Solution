@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Menu des intégrations";
+    ViewBag.Title = "Menu des intégrations";
+    ViewBag.pTitle = "Menu des intégrations";
+    ViewBag.pageTitle = "Intégrations";
+
+}
+<input id="allianceid"
+       name="allianceid"
+       type="hidden"
+       value="@ViewContext.RouteData.Values["allianceid"].ToString()" />
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <a href="@Url.Action("AppUsers","integration",new { allianceid = ViewBag.Alliance.Id },null)">
+                <div class="card-body" style="text-align:center;">
+
+                    <h4 class="card-title mb-4">Applications</h4>
+
+
+                    <i class="fas fa-robot fa-10x"></i>
+
+
+
+
+
+                </div>
+            </a>
+            
+        </div>
+    </div>
+</div>

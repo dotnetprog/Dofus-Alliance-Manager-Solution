@@ -1,0 +1,71 @@
+﻿@using DAM.WebApp.OAuth.Discord.Services;
+@inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    @await Html.PartialAsync("~/Views/Shared/_title_meta.cshtml")
+    @RenderSection("styles", false)
+    @await Html.PartialAsync("~/Views/Shared/_head_css.cshtml")
+    @RenderSection("metahead", required: false)
+    @Html.Raw(JavaScriptSnippet.FullScript)
+    <style>
+        .icon-advanced {
+            background: url(@Url.Content("~/assets/images/small/battle.svg")); 
+            background-repeat: no-repeat;
+            background-size: cover; /* stretch the background to cover the whole element */
+            /*
+               still inline, but has block features
+               meaning height and width can be set
+            */
+            display: inline-block;
+            height: 20px;
+            width: 20px;
+        }
+    </style>
+</head>
+
+<body data-topbar="light" data-sidebar="dark">
+
+    <!-- Begin page -->
+    <div id="layout-wrapper">
+        @await Html.PartialAsync("~/Views/Shared/_topbar.cshtml")
+        @await Html.PartialAsync("~/Views/Shared/_sidebar.cshtml")
+
+        <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+
+        <div class="main-content">
+            <div class="page-content">
+                <div class="container-fluid">
+                    @await Html.PartialAsync("~/Views/Shared/_page_title.cshtml")
+
+                    @RenderBody()
+                </div> <!-- container-fluid -->
+            </div>
+            <!-- End Page-content -->
+            @await Html.PartialAsync("~/Views/Shared/_footer.cshtml")
+        </div>
+        <!-- end main content-->
+
+    </div>
+
+    <!-- END layout-wrapper -->
+    @await Html.PartialAsync("~/Views/Shared/_right_sidebar.cshtml")
+
+    @await Html.PartialAsync("~/Views/Shared/_vendor_scripts.cshtml")
+    <script src="~/assets/libs/JWTManager/JWTManager.js"></script>
+    <script src="~/assets/js/app.js"></script>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script src="~/assets/js/authApp.js"></script>
+    }
+    @RenderSection("scripts", required: false)
+   
+  
+</body>
+
+</html>

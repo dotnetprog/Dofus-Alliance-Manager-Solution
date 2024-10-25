@@ -1,0 +1,22 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    @Html.Partial("~/Views/Shared/_title_meta.cshtml")
+
+    @Html.Partial("~/Views/Shared/_head_css.cshtml")
+</head>
+
+<body class="authentication-bg">
+    <!-- Begin page -->
+    @RenderBody()
+
+    <!-- JAVASCRIPT -->
+    @Html.Partial("~/Views/Shared/_vendor_scripts.cshtml")
+
+    @RenderSection("scripts", required: false)
+    <!-- App js -->
+    
+    <script src="~/assets/js/app.js"></script>
+</body>
+
+</html>

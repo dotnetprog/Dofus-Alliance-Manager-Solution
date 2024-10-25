@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DAM.Tool.DataMigrations": {
+      "commandName": "Project",
+      "commandLineArgs": "Inactives --dsid 1128083543462006844 --cid 1128094390741631157"
+    }
+  }
+}

@@ -1,0 +1,445 @@
+﻿@using DAM.Domain.Entities;
+@using DAM.Domain.Enums
+@using DAM.WebApp.Models.Alliance;
+@using Discord.Rest;
+@model AllianceConfigurationBaremeViewModel?
+@{
+    ViewData["Title"] = "Configuration";
+    ViewBag.Title = "Configuration";
+    ViewBag.pTitle = "Configuration";
+    ViewBag.pageTitle = "Alliances";
+    
+}
+@section styles{
+    <!-- select2 css -->
+    <link href="~/assets/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- dropzone css -->
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/toastr/build/toastr.min.css">
+}
+@section scripts{
+    <script src="~/assets/libs/toastr/build/toastr.min.js"></script>
+    <script src="~/assets/js/views/alliance/configuration.js"></script>
+}
+<style>
+    .subFormGroup{
+        display: block;
+        padding: 1.5rem;
+        margin-right: 0;
+        margin-left: 0;
+        border-top-left-radius: 0.25rem;
+        border-top-right-radius: 0.25rem;
+        border: solid 1px #dee2e6;
+    }
+</style>
+<div class="row">
+    <div class="col-lg-12">
+        <div id="configuration-accordion" class="custom-accordion">
+            <div class="card">
+                <a href="#allianceconfig-collapse" class="text-dark" data-bs-toggle="collapse" aria-expanded="true" aria-controls="allianceconfig-collapse">
+                    <div class="p-4">
+
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0 me-3">
+                                <div class="avatar-xs">
+                                    <div class="avatar-title rounded-circle bg-soft-primary text-primary">
+                                        01
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <h5 class="font-size-16 mb-1">Configuration Serveur</h5>
+                                <p class="text-muted text-truncate mb-0">Remplir les informations ci-dessous</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="mdi mdi-chevron-up accor-down-icon font-size-24"></i>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </a>
+                <div id="allianceconfig-collapse" class="collapse show" data-bs-parent="#configuration-accordion">
+                    <div class="p-4 border-top">
+                            @Html.HiddenFor(Model => Model.Id)
+                            @Html.HiddenFor(Model => Model.BehaviorScreenConfigJSONData)
+
+                        <input  id="allianceid"
+                               name="allianceid"
+                               type="hidden"
+                               value="@ViewContext.RouteData.Values["allianceid"].ToString()" />
+                        <div class="mb-3">
+                            <label class="form-label">Type de comportement du bot comptable</label>
+                            <select asp-for="BotScreenBehaviorType" asp-items="Html.GetEnumSelectList<BotScreenBehaviorType>()" required class="form-select">
+                                <option selected="selected" value="">Choisir</option>
+                            </select>
+                        </div>
+                        <div style="display:block;" class="mb-3 subFormGroup">
+                            <select style="display:none;" id="templateChannels">
+                                @foreach (var txtchannel in ViewBag.TextChannels as IReadOnlyCollection<RestGuildChannel>)
+                                {
+                                    <option value="@txtchannel.Id">@txtchannel.Name</option>
+                                }
+                            </select>
+                            <div id="behaviorConfigContainer" class="row">
+                            </div>
+                        </div>
+                            <div class="mb-3">
+                                <label class="form-label" >Canal Attaque Screen</label>
+                            @{
+                                var txtChannels = ViewBag.TextChannels as IReadOnlyCollection<RestGuildChannel>;
+                                var atkList = txtChannels.Select(c => new SelectListItem
+                                                    {
+                                                        Text = c.Name,
+                                                        Value = c.Id.ToString(),
+                                                         Selected = c.Id == Model?.AtkScreen_DiscordChannelId
+                                                    });
+                                @Html.DropDownListFor(Model => Model.AtkScreen_DiscordChannelId,atkList,"Select",new { @class="form-control select2" })
+                                
+
+                            }
+                              
+
+                                   
+                               
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" >Canal Defense Screen</label>
+                                
+                             
+                                    @{
+                                         var selectList = txtChannels.Select(c => new SelectListItem {
+                                            Text = c.Name,
+                                            Value = c.Id.ToString(),
+                                            Selected = c.Id == Model?.DefScreen_DiscordChannelId
+                                         });
+                                        @Html.DropDownListFor(Model => Model.DefScreen_DiscordChannelId,selectList,"Select",new { @class="form-control select2" });
+
+                                    }
+                                  
+                                
+                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Canal Classement Saison par défaut</label>
+
+
+                            @{
+                                var optionList2 = txtChannels.Select(c => new SelectListItem
+                                {
+                                    Text = c.Name,
+                                    Value = c.Id.ToString(),
+                                    Selected = c.Id == Model?.DefaultSeasonRankingChannelId
+                                });
+                                @Html.DropDownListFor(Model => Model.DefaultSeasonRankingChannelId, optionList2, "Select", new { @class = "form-control select2" })
+
+
+                            }
+
+
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Canal Rapport Pepites</label>
+
+
+                            @{
+                                var optionList = txtChannels.Select(c => new SelectListItem
+                                                    {
+                                                        Text = c.Name,
+                                                        Value = c.Id.ToString(),
+                                                        Selected = c.Id == Model?.Rapport_DiscordChannelId
+                                                    });
+                                @Html.DropDownListFor(Model => Model.Rapport_DiscordChannelId,optionList,"Select",new { @class="form-control select2" })
+                                
+
+                            }
+
+
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Canal Forum AvA</label>
+
+
+                            @{
+                                var forumChannels = ViewBag.Forums as IReadOnlyCollection<RestGuildChannel>;
+                                var forumList = forumChannels.Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString(),
+                Selected = c.Id == Model?.Ava_DiscordForumChannelId
+            });
+                                @Html.DropDownListFor(Model => Model.Ava_DiscordForumChannelId,forumList,"Select",new { @class="form-control select2" })
+                                
+
+                            }
+
+
+                        </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="productname">Rôle Approbateur</label>
+                                @{
+                                    var roles = ViewBag.Roles as IReadOnlyCollection<RestRole>;
+                                    var roleList = roles.Select(c => new SelectListItem
+                                            {
+                                                Text = c.Name,
+                                                Value = c.Id.ToString(),
+                                                Selected = c.Id == Model?.ScreenApproverRoleId
+                                            });
+                                    @Html.DropDownListFor(Model => Model.ScreenApproverRoleId,roleList,"Select",new { @class="form-control select2" })
+
+
+                                }
+                                         
+                                
+                            </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="productname">Barème attaque par défaut</label>
+                            @{
+                                
+                                var baremeAttaquelist = Model.Baremes.Where(b => b.Type == DAM.Domain.Entities.BaremeType.Attaque || !b.Type.HasValue)
+                                .Select(c => new SelectListItem
+                                    {
+                                        Text = c.Name,
+                                        Value = c.Id.ToString(),
+                                        Selected = c.Id == Model.DefaultAttaqueBareme
+                                    });
+                                @Html.DropDownListFor(Model => Model.DefaultAttaqueBareme,baremeAttaquelist,"Select",new { @class="form-control select2" })
+
+
+                            }
+
+
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="productname">Barème défence par défaut</label>
+                            @{
+                                var baremeDefencelist = Model.Baremes.Where(b => b.Type == DAM.Domain.Entities.BaremeType.Defense || !b.Type.HasValue)
+                                .Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString(),
+                Selected = c.Id == Model.DefaultDefBareme
+            });
+                                @Html.DropDownListFor(Model => Model.DefaultDefBareme,baremeDefencelist,"Select",new { @class="form-control select2" })
+
+
+                            }
+
+
+                        </div>
+                            <div class="mb-3">
+                            <div class="form-check form-switch form-switch-lg">
+                                @Html.CheckBoxFor(Model => Model.IsScreenPrepaRequired,new { @class="form-check-input"})
+                                <label class="form-check-label" for="IsScreenPrepaRequired">Screen préparation obligatoire pour les attaques sans défence</label>
+                            </div>
+                            <div class="form-check form-switch form-switch-lg">
+                                @Html.CheckBoxFor(Model => Model.IsAllianceEnemyRequired,new { @class="form-check-input"})
+                                <label class="form-check-label" for="IsAllianceEnemyRequired">Alliance ennemie obligatoire</label>
+                            </div>
+                            <div class="form-check form-switch form-switch-lg">
+                                @Html.CheckBoxFor(Model => Model.AutoValidateNodef, new { @class = "form-check-input" })
+                                <label class="form-check-label" for="AutoValidateNodef">Valider automatiquement les attaques sans défense</label>
+                            </div>
+                            <div class="form-check form-switch form-switch-lg">
+                                @Html.CheckBoxFor(Model => Model.AllowSeasonOverlap, new { @class = "form-check-input" })
+                                <label class="form-check-label" for="AllowSeasonOverlap">Autoriser les saisons concurrentielles</label>
+                            </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col ms-auto">
+                                    <div class="d-flex flex-reverse flex-wrap gap-2">
+                                        <button class="btn btn-danger"> <i class="uil uil-times"></i>Annuler</button>
+                                        <button id="saveConfig"  class="btn btn-success"> <i class="uil uil-file-alt"></i> Sauvegarder</button>
+                                    </div>
+                                </div> <!-- end col -->
+                            </div>
+                        
+                    </div>
+                </div>
+                
+            </div>
+            <div class="card">
+                <a href="#baremelist-collapse" class="text-dark collapsed" data-bs-toggle="collapse" aria-haspopup="true" aria-expanded="false" aria-haspopup="true" aria-controls="baremelist-collapse">
+                    <div class="p-4">
+
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0 me-3">
+                                <div class="avatar-xs">
+                                    <div class="avatar-title rounded-circle bg-soft-primary text-primary">
+                                        02
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <h5 class="font-size-16 mb-1">Configurer vos barèmes</h5>
+                                <p class="text-muted text-truncate mb-0">Liste de vos barèmes</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="mdi mdi-chevron-up accor-down-icon font-size-24"></i>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </a>
+
+                <div id="baremelist-collapse" class="collapse" data-bs-parent="#configuration-accordion">
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <a href="@Url.Action("AddBareme","alliance",new { allianceid = ViewBag.Alliance.Id })" class="btn btn-success waves-effect waves-light"><i class="mdi mdi-plus me-2"></i>Ajouter un barème</a>
+                                </div>
+                            </div>
+
+                            
+
+
+                        </div>
+                        <!-- end row -->
+                        <div class="table-responsive mb-4">
+                            <table class="table table-centered table-nowrap mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="width: 1px;"></th>
+                                        <th scope="col">Nom</th>
+                                        <th scope="col" style="width: 200px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        foreach (var bareme in Model.Baremes)
+                                        {
+                                            <tr recordid="@bareme.Id">
+                                                <td>
+                                                    @{
+                                                        switch (bareme.Type)
+                                                        {
+                                                            case BaremeType.Attaque:
+                                                                <i title="attaque" style="color:red" class="fas fa-fist-raised"></i>
+                                                                break;
+                                                            case BaremeType.Defense:
+                                                                <i  title="defence" style="color:blue" class="bx bx-shield-alt-2"></i>
+                                                                break;
+                                                            default:
+                                                                break;
+                                                        }
+                                                       
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <a href="@Url.Action("EditBareme","alliance",new {allianceid=ViewBag.Alliance.Id,BaremeId = bareme.Id})" class="text-body">@bareme.Name</a>
+                                                </td>
+                                                <td>
+                                                    <ul class="list-inline mb-0">
+                                                        <li class="list-inline-item">
+                                                            <a href="@Url.Action("EditBareme","alliance",new {allianceid=ViewBag.Alliance.Id,BaremeId = bareme.Id})" class="px-2 text-primary"><i class="uil uil-pen font-size-18"></i></a>
+                                                        </li>
+                                                        <li class="list-inline-item">
+                                                            <a href="#" recordid="@bareme.Id" class="px-2 text-danger deleteBaremebtn"><i class="uil uil-trash-alt font-size-18"></i></a>
+                                                        </li>
+
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                  
+                                
+
+                                </tbody>
+                            </table>
+                        </div>
+                       
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="card">
+                <a href="#allianceEnemy-collapse" class="text-dark collapsed" data-bs-toggle="collapse" aria-haspopup="true" aria-expanded="false" aria-haspopup="true" aria-controls="baremelist-collapse">
+                    <div class="p-4">
+
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0 me-3">
+                                <div class="avatar-xs">
+                                    <div class="avatar-title rounded-circle bg-soft-primary text-primary">
+                                        03
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <h5 class="font-size-16 mb-1">Configurer vos adversaires (alliances ennemis)</h5>
+                                <p class="text-muted text-truncate mb-0">Liste de vos ennemis</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="mdi mdi-chevron-up accor-down-icon font-size-24"></i>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </a>
+
+                <div id="allianceEnemy-collapse" class="collapse" data-bs-parent="#configuration-accordion">
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <a href="@Url.Action("AddEnemy","alliance",new { allianceid = ViewBag.Alliance.Id })" class="btn btn-success waves-effect waves-light"><i class="mdi mdi-plus me-2"></i>Ajouter une alliance ennemi</a>
+                                </div>
+                            </div>
+
+
+
+
+                        </div>
+                        <!-- end row -->
+                        <div class="table-responsive mb-4">
+                            <table class="table table-centered table-nowrap mb-0">
+                                <thead>
+                                    <tr>
+
+                                        <th scope="col">Nom</th>
+                                        <th scope="col" style="width: 200px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        foreach (var enemy in Model.Enemies)
+                                        {
+                                            <tr recordid="@enemy.Id">
+
+                                                <td>
+                                                    <a href="@Url.Action("EditEnemy","alliance",new {allianceid=ViewBag.Alliance.Id,EnemyId = enemy.Id})" class="text-body">@enemy.Name</a>
+                                                </td>
+                                                <td>
+                                                    <ul class="list-inline mb-0">
+                                                        <li class="list-inline-item">
+                                                            <a href="@Url.Action("EditEnemy","alliance",new {allianceid=ViewBag.Alliance.Id,EnemyId = enemy.Id})" class="px-2 text-primary"><i class="uil uil-pen font-size-18"></i></a>
+                                                        </li>
+                                                        <li class="list-inline-item">
+                                                            <a href="#" recordid="@enemy.Id" class="px-2 text-danger deleteEnemybtn"><i class="uil uil-trash-alt font-size-18"></i></a>
+                                                        </li>
+
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+
+
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
