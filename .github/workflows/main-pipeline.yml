@@ -50,7 +50,8 @@ jobs:
       if: ${{ (github.ref == 'refs/heads/main' || contains(github.ref, 'release')) && github.event_name != 'pull_request' }}
       run: dotnet publish ${{  env.solutionFolder  }}/DAM.WebApp/DAM.WebApp.csproj -c Release -o ${{env.DOTNET_ROOT}}/webapp
     - name: Upload webapp artifact
-      if: ${{ ${{  env.cd_enabled  }} && (github.ref == 'refs/heads/main' || contains(github.ref, 'release')) && github.event_name != 'pull_request' }}
+    #  if: ${{ (github.ref == 'refs/heads/main' || contains(github.ref, 'release')) && github.event_name != 'pull_request' }}
+      if: ${{ env.cd_enabled }}
       uses: actions/upload-artifact@v3
       with:
          name: webapp
@@ -60,7 +61,8 @@ jobs:
    name: 'Staging'
    needs: build
    uses: ./.github/workflows/cd-pipeline.yml
-   if: ${{ ${{  env.cd_enabled  }} && (github.ref == 'refs/heads/main' || contains(github.ref, 'release')) && github.event_name != 'pull_request' }}
+   if: ${{ env.cd_enabled }}
+ #  if: ${{ (github.ref == 'refs/heads/main' || contains(github.ref, 'release')) && github.event_name != 'pull_request' }}
    with:
      deployWorkService: false
      environment: 'staging'
@@ -84,7 +86,8 @@ jobs:
    name: 'Production'
    needs: deployStaging
    uses: ./.github/workflows/cd-pipeline.yml
-   if: ${{ ${{  env.cd_enabled  }} && contains(github.ref, 'release') && github.event_name != 'pull_request' }}
+   if: ${{ env.cd_enabled }}
+  # if: ${{  contains(github.ref, 'release') && github.event_name != 'pull_request' }}
    with:
      deployWorkService: true
      environment: 'production'
