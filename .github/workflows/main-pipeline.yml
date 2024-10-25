@@ -18,7 +18,7 @@ on:
 env:
   solutionPath: '${{ github.workspace }}/src/DAM.Application.sln'
   solutionFolder: '${{ github.workspace }}/src'
-  cd_enabled : false
+  cd_enabled: false
 jobs:
   build:
 
