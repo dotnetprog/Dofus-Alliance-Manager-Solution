@@ -18,6 +18,7 @@ on:
 env:
   solutionPath: '${{ github.workspace }}/src/DAM.Application.sln'
   solutionFolder: '${{ github.workspace }}/src'
+  cd_enabled : false
 jobs:
   build:
 
@@ -59,7 +60,7 @@ jobs:
    name: 'Staging'
    needs: build
    uses: ./.github/workflows/cd-pipeline.yml
-   if: ${{ (github.ref == 'refs/heads/main' || contains(github.ref, 'release')) && github.event_name != 'pull_request' }}
+   if: ${{ env.cd_enabled && (github.ref == 'refs/heads/main' || contains(github.ref, 'release')) && github.event_name != 'pull_request' }}
    with:
      deployWorkService: false
      environment: 'staging'
@@ -83,7 +84,7 @@ jobs:
    name: 'Production'
    needs: deployStaging
    uses: ./.github/workflows/cd-pipeline.yml
-   if: ${{ contains(github.ref, 'release') && github.event_name != 'pull_request' }}
+   if: ${{ env.cd_enabled && contains(github.ref, 'release') && github.event_name != 'pull_request' }}
    with:
      deployWorkService: true
      environment: 'production'
